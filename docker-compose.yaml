@@ -1,0 +1,38 @@
+version: '3'
+services:
+
+  mysql:
+      container_name: full_db_mysql
+      image: mysql:latest
+      healthcheck:
+        test: mysql --user=root --password=rahasia -e 'SHOW DATABASES;'
+        timeout: 20s
+        retries: 10
+      ports: 
+        - 3306:3306
+      environment: 
+        - MYSQL_ROOT_HOST=mysql  
+        - MYSQL_DATABASE=crud_go 
+        - MYSQL_ROOT_PASSWORD=rahasia 
+      networks:
+        - altasirclo-networks
+
+  api-hilmi:
+    container_name: apihilmi
+    build: .
+    entrypoint: ./main
+    ports: 
+      - 8000:8000 
+    environment: 
+        - ADDRESS=mysql
+        - PASSWORD=rahasia 
+    restart: on-failure
+    depends_on:
+      mysql :
+        condition: service_healthy          
+    networks:
+      - altasirclo-networks                  
+
+networks:
+  altasirclo-networks:
+    driver: bridge
